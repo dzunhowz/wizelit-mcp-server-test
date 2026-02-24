@@ -74,9 +74,11 @@ wizelit-mcp-server-test/
 ### CLI Tools (Subprocess Adapter)
 
 #### 1. `analyze_code_cli`
+
 Analyzes JavaScript code for issues and metrics.
 
 **Input:**
+
 ```json
 {
   "code": "function test() { eval('x'); }"
@@ -84,6 +86,7 @@ Analyzes JavaScript code for issues and metrics.
 ```
 
 **Output:**
+
 ```json
 {
   "metrics": { "lines": 1, "complexity": 1 },
@@ -95,9 +98,11 @@ Analyzes JavaScript code for issues and metrics.
 ```
 
 #### 2. `format_code_cli`
+
 Formats JavaScript code using Prettier.
 
 **Input:**
+
 ```json
 {
   "code": "function   test(){return 1}",
@@ -106,6 +111,7 @@ Formats JavaScript code using Prettier.
 ```
 
 **Output:**
+
 ```json
 {
   "original": "function   test(){return 1}",
@@ -116,9 +122,11 @@ Formats JavaScript code using Prettier.
 ```
 
 #### 3. `validate_code_cli`
+
 Validates JavaScript code syntax.
 
 **Input:**
+
 ```json
 {
   "code": "function test() { return 1; }",
@@ -127,6 +135,7 @@ Validates JavaScript code syntax.
 ```
 
 **Output:**
+
 ```json
 {
   "valid": true,
@@ -139,11 +148,13 @@ Validates JavaScript code syntax.
 ### HTTP Tools (HTTP Adapter)
 
 #### 4. `process_code`
+
 Processes code with multiple operations.
 
 **Endpoint:** `POST http://localhost:3000/process`
 
 **Input:**
+
 ```json
 {
   "code": "function test() { return 1; }",
@@ -152,11 +163,13 @@ Processes code with multiple operations.
 ```
 
 #### 5. `analyze_code_deep`
+
 Deep code analysis with suggestions.
 
 **Endpoint:** `POST http://localhost:3000/analyze`
 
 **Input:**
+
 ```json
 {
   "code": "function complex() { ... }",
@@ -166,11 +179,13 @@ Deep code analysis with suggestions.
 ```
 
 #### 6. `format_code_http`
+
 Format code via HTTP service.
 
 **Endpoint:** `POST http://localhost:3000/format`
 
 #### 7. `health_check`
+
 Check service health status.
 
 **Endpoint:** `GET http://localhost:3000/health`
@@ -231,37 +246,37 @@ Edit `config/bridge-config.yaml` to:
 
 ```yaml
 tools:
-  - name: "my_new_tool"
-    description: "My new Node.js tool"
-    adapter_type: "subprocess"
+  - name: 'my_new_tool'
+    description: 'My new Node.js tool'
+    adapter_type: 'subprocess'
     config:
-      command: ["node", "tools/my-tool.js"]
+      command: ['node', 'tools/my-tool.js']
       timeout: 30
     input_schema:
-      type: "object"
+      type: 'object'
       properties:
         input:
-          type: "string"
-      required: ["input"]
+          type: 'string'
+      required: ['input']
 ```
 
 ### Example: Adding a New HTTP Endpoint
 
 ```yaml
 tools:
-  - name: "my_http_tool"
-    description: "My HTTP-based tool"
-    adapter_type: "http"
+  - name: 'my_http_tool'
+    description: 'My HTTP-based tool'
+    adapter_type: 'http'
     config:
-      url: "http://localhost:3000/my-endpoint"
-      method: "POST"
+      url: 'http://localhost:3000/my-endpoint'
+      method: 'POST'
       timeout: 60
     input_schema:
-      type: "object"
+      type: 'object'
       properties:
         data:
-          type: "string"
-      required: ["data"]
+          type: 'string'
+      required: ['data']
 ```
 
 ## 🔍 Integration Patterns
@@ -269,6 +284,7 @@ tools:
 ### Pattern 1: Simple CLI Tool (Recommended for Quick Tools)
 
 **Use when:**
+
 - Simple, stateless operations
 - No shared state needed
 - Fast execution (< 30s)
@@ -278,6 +294,7 @@ tools:
 ### Pattern 2: HTTP Service (Recommended for Complex Operations)
 
 **Use when:**
+
 - Long-running operations
 - Shared state/caching needed
 - Multiple related endpoints
@@ -288,6 +305,7 @@ tools:
 ### Pattern 3: Hybrid (Best for Complete Solutions)
 
 **Use both:**
+
 - CLI tools for quick operations
 - HTTP service for complex operations
 - Bridge coordinates both seamlessly

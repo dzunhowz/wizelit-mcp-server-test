@@ -254,19 +254,19 @@ async def review_code(code: str):
     validation = await bridge.call_tool("validate_code_cli", {"code": code})
     if not validation["valid"]:
         return {"status": "invalid", "errors": validation["errors"]}
-    
+
     # Step 2: Analyze
     analysis = await bridge.call_tool("analyze_code_deep", {
         "code": code,
         "deep": True,
         "include_suggestions": True
     })
-    
+
     # Step 3: Format if needed
     if analysis["metrics"]["complexity"] > 10:
         formatted = await bridge.call_tool("format_code_cli", {"code": code})
         code = formatted["formatted"]
-    
+
     return {
         "status": "reviewed",
         "analysis": analysis,
@@ -279,22 +279,22 @@ async def review_code(code: str):
 ```python
 async def process_files(files: list):
     results = []
-    
+
     for file_path in files:
         with open(file_path) as f:
             code = f.read()
-        
+
         # Use HTTP service for batch processing
         result = await bridge.call_tool("process_code", {
             "code": code,
             "operations": ["validate", "analyze", "format"]
         })
-        
+
         results.append({
             "file": file_path,
             "result": result
         })
-    
+
     return results
 ```
 
@@ -307,17 +307,17 @@ async def on_file_save(code: str):
     quick_result = await bridge.call_tool("analyze_code_cli", {
         "code": code
     })
-    
+
     # Show quick feedback
     show_issues(quick_result["issues"])
-    
+
     # Deep analysis in background (slower)
     deep_result = await bridge.call_tool("analyze_code_deep", {
         "code": code,
         "deep": True,
         "include_suggestions": True
     })
-    
+
     # Show suggestions
     show_suggestions(deep_result["suggestions"])
 ```
@@ -338,14 +338,14 @@ sleep 2
 # Analyze all JS files
 for file in src/**/*.js; do
   code=$(cat "$file")
-  
+
   # Call via Universal Bridge
   result=$(wizelit-sdk call-tool analyze_code_deep \
     --input "{\"code\": \"$code\", \"deep\": false}")
-  
+
   # Check for high severity issues
   high_issues=$(echo "$result" | jq '.summary.high')
-  
+
   if [ "$high_issues" -gt 0 ]; then
     echo "❌ High severity issues found in $file"
     exit 1
@@ -361,12 +361,14 @@ kill $SERVICE_PID
 ## Performance Comparison
 
 ### CLI Tools (Subprocess Adapter)
+
 - **Startup**: ~50-100ms (Node.js process startup)
 - **Execution**: Fast (no network overhead)
 - **Best for**: Quick, stateless operations
 - **Concurrent**: Each call spawns new process
 
 ### HTTP Service (HTTP Adapter)
+
 - **Startup**: One-time service startup
 - **Execution**: Network overhead (~5-10ms)
 - **Best for**: Complex operations, state sharing
@@ -375,17 +377,20 @@ kill $SERVICE_PID
 ### When to Use Each
 
 **Use CLI Tools when:**
+
 - Simple, stateless operations
 - Don't need shared state
 - Fast execution is critical
 
 **Use HTTP Service when:**
+
 - Need caching/state
 - Multiple related operations
 - Long-running tasks
 - Need request queuing
 
 **Use Both (Hybrid) when:**
+
 - Want flexibility
 - Different operation types
 - Gradual migration
@@ -441,6 +446,7 @@ wizelit-sdk run-bridge --config config/bridge-config.yaml --dry-run
 ---
 
 For more information, see:
+
 - [Main README](README.md)
 - [Bridge Configuration](config/bridge-config.yaml)
 - [Universal Bridge Docs](../wizelit-sdk/examples/NODEJS_INDEX.md)

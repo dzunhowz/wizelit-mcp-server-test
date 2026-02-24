@@ -19,7 +19,7 @@ const colors = {
   red: '\x1b[31m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 function log(message, color = 'reset') {
@@ -36,19 +36,19 @@ function logSection(title) {
 function testCLI(toolName, args) {
   return new Promise((resolve, reject) => {
     log(`\nTesting: ${toolName}`, 'blue');
-    
+
     const proc = spawn('node', [toolName, ...args]);
     let output = '';
     let error = '';
-    
+
     proc.stdout.on('data', (data) => {
       output += data.toString();
     });
-    
+
     proc.stderr.on('data', (data) => {
       error += data.toString();
     });
-    
+
     proc.on('close', (code) => {
       if (code === 0) {
         try {
@@ -74,9 +74,9 @@ function testCLI(toolName, args) {
 function testHTTP(endpoint, method, data) {
   return new Promise((resolve, reject) => {
     log(`\nTesting: ${method} ${endpoint}`, 'blue');
-    
+
     const postData = data ? JSON.stringify(data) : '';
-    
+
     const options = {
       hostname: 'localhost',
       port: 3000,
@@ -84,17 +84,17 @@ function testHTTP(endpoint, method, data) {
       method: method,
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
+        'Content-Length': Buffer.byteLength(postData),
+      },
     };
-    
+
     const req = http.request(options, (res) => {
       let output = '';
-      
+
       res.on('data', (chunk) => {
         output += chunk.toString();
       });
-      
+
       res.on('end', () => {
         try {
           const result = JSON.parse(output);
@@ -114,13 +114,13 @@ function testHTTP(endpoint, method, data) {
         }
       });
     });
-    
+
     req.on('error', (error) => {
       log(`✗ Request failed: ${error.message}`, 'red');
       log('Make sure HTTP service is running: npm start', 'yellow');
       reject(error);
     });
-    
+
     if (postData) {
       req.write(postData);
     }
@@ -148,21 +148,21 @@ function checkHTTPService() {
 async function runTests() {
   log('\n🧪 Wizelit MCP Server Test Suite', 'cyan');
   log('Testing CLI tools and HTTP service\n', 'cyan');
-  
+
   let cliPassed = 0;
   let cliFailed = 0;
   let httpPassed = 0;
   let httpFailed = 0;
-  
+
   // Test CLI Tools
   logSection('📋 Testing CLI Tools (Subprocess Integration)');
-  
+
   const cliTests = [
     ['tools/analyze-code.js', [TEST_CODE]],
     ['tools/format-code.js', [FORMATTED_CODE]],
-    ['tools/validate-code.js', [TEST_CODE]]
+    ['tools/validate-code.js', [TEST_CODE]],
   ];
-  
+
   for (const [tool, args] of cliTests) {
     try {
       await testCLI(tool, args);
@@ -171,12 +171,12 @@ async function runTests() {
       cliFailed++;
     }
   }
-  
+
   // Test HTTP Service
   logSection('🌐 Testing HTTP Service');
-  
+
   const httpRunning = await checkHTTPService();
-  
+
   if (!httpRunning) {
     log('\n⚠️  HTTP service is not running', 'yellow');
     log('Start it with: npm start', 'yellow');
@@ -184,11 +184,19 @@ async function runTests() {
   } else {
     const httpTests = [
       ['/health', 'GET', null],
-      ['/process', 'POST', { code: TEST_CODE, operations: ['validate', 'analyze'] }],
-      ['/analyze', 'POST', { code: TEST_CODE, deep: false, include_suggestions: true }],
-      ['/format', 'POST', { code: FORMATTED_CODE }]
+      [
+        '/process',
+        'POST',
+        { code: TEST_CODE, operations: ['validate', 'analyze'] },
+      ],
+      [
+        '/analyze',
+        'POST',
+        { code: TEST_CODE, deep: false, include_suggestions: true },
+      ],
+      ['/format', 'POST', { code: FORMATTED_CODE }],
     ];
-    
+
     for (const [endpoint, method, data] of httpTests) {
       try {
         await testHTTP(endpoint, method, data);
@@ -198,37 +206,37 @@ async function runTests() {
       }
     }
   }
-  
+
   // Summary
   logSection('📊 Test Summary');
-  
+
   console.log(`\nCLI Tools (Subprocess):`);
   log(`  ✓ Passed: ${cliPassed}`, cliPassed > 0 ? 'green' : 'reset');
   log(`  ✗ Failed: ${cliFailed}`, cliFailed > 0 ? 'red' : 'reset');
-  
+
   if (httpRunning) {
     console.log(`\nHTTP Service:`);
     log(`  ✓ Passed: ${httpPassed}`, httpPassed > 0 ? 'green' : 'reset');
     log(`  ✗ Failed: ${httpFailed}`, httpFailed > 0 ? 'red' : 'reset');
   }
-  
+
   const totalPassed = cliPassed + httpPassed;
   const totalFailed = cliFailed + httpFailed;
-  
+
   console.log(`\nTotal:`);
   log(`  ✓ Passed: ${totalPassed}`, totalPassed > 0 ? 'green' : 'reset');
   log(`  ✗ Failed: ${totalFailed}`, totalFailed > 0 ? 'red' : 'reset');
-  
+
   console.log('\n' + '='.repeat(60));
-  
+
   if (totalFailed === 0) {
     log('\n✨ All tests passed!', 'green');
   } else {
     log(`\n⚠️  ${totalFailed} test(s) failed`, 'yellow');
   }
-  
+
   console.log();
-  
+
   process.exit(totalFailed > 0 ? 1 : 0);
 }
 

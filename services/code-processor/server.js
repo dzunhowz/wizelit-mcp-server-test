@@ -1,7 +1,7 @@
 /**
  * Code Processor Service
  * HTTP API for code processing operations
- * 
+ *
  * Endpoints:
  * - POST /process - Process code with various operations
  * - POST /analyze - Deep code analysis
@@ -25,7 +25,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     service: 'code-processor',
     uptime: process.uptime(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -33,38 +33,37 @@ app.get('/health', (req, res) => {
 app.post('/process', async (req, res) => {
   try {
     const { code, operations = ['validate', 'analyze'] } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({ error: 'Code is required' });
     }
-    
+
     const results = {};
-    
+
     // Validate if requested
     if (operations.includes('validate')) {
       results.validation = validateCode(code);
     }
-    
+
     // Analyze if requested
     if (operations.includes('analyze')) {
       results.analysis = analyzeCode(code);
     }
-    
+
     // Format if requested
     if (operations.includes('format')) {
       results.formatting = formatCode(code);
     }
-    
+
     res.json({
       results,
       operations_completed: operations,
-      processed_at: new Date().toISOString()
+      processed_at: new Date().toISOString(),
     });
-    
   } catch (error) {
     res.status(500).json({
       error: error.message,
-      type: 'ProcessError'
+      type: 'ProcessError',
     });
   }
 });
@@ -73,29 +72,28 @@ app.post('/process', async (req, res) => {
 app.post('/analyze', async (req, res) => {
   try {
     const { code, deep = false, include_suggestions = true } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({ error: 'Code is required' });
     }
-    
+
     // Simulate long-running analysis
     if (deep) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
-    
+
     const analysis = analyzeCode(code);
-    
+
     // Add suggestions if requested
     if (include_suggestions) {
       analysis.suggestions = generateSuggestions(analysis);
     }
-    
+
     res.json(analysis);
-    
   } catch (error) {
     res.status(500).json({
       error: error.message,
-      type: 'AnalysisError'
+      type: 'AnalysisError',
     });
   }
 });
@@ -104,18 +102,17 @@ app.post('/analyze', async (req, res) => {
 app.post('/format', async (req, res) => {
   try {
     const { code, options = {} } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({ error: 'Code is required' });
     }
-    
+
     const result = formatCode(code, options);
     res.json(result);
-    
   } catch (error) {
     res.status(500).json({
       error: error.message,
-      type: 'FormatError'
+      type: 'FormatError',
     });
   }
 });
@@ -123,24 +120,24 @@ app.post('/format', async (req, res) => {
 // Helper functions
 function validateCode(code) {
   const errors = [];
-  
+
   try {
     new Function(code);
-    
+
     const openBraces = (code.match(/\{/g) || []).length;
     const closeBraces = (code.match(/\}/g) || []).length;
     if (openBraces !== closeBraces) {
       errors.push({ type: 'syntax', message: 'Mismatched braces' });
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   } catch (error) {
     return {
       valid: false,
-      errors: [{ type: 'syntax', message: error.message }]
+      errors: [{ type: 'syntax', message: error.message }],
     };
   }
 }
@@ -148,48 +145,48 @@ function validateCode(code) {
 function analyzeCode(code) {
   const lines = code.split('\n').length;
   const complexity = calculateComplexity(code);
-  
+
   const issues = [];
   if (code.includes('eval(')) {
     issues.push({
       severity: 'high',
       message: 'Use of eval() detected',
-      category: 'security'
+      category: 'security',
     });
   }
-  
+
   return {
     metrics: {
       lines,
       complexity,
-      rating: complexity <= 10 ? 'simple' : 'complex'
+      rating: complexity <= 10 ? 'simple' : 'complex',
     },
     issues,
     summary: {
       total_issues: issues.length,
-      high: issues.filter(i => i.severity === 'high').length
-    }
+      high: issues.filter((i) => i.severity === 'high').length,
+    },
   };
 }
 
 function formatCode(code, options = {}) {
   let formatted = code.trim();
-  
+
   if (options.addSemicolons !== false) {
     formatted = formatted.replace(/([^;{}\s])(\n|$)/g, '$1;$2');
   }
-  
+
   return {
     original: code,
     formatted: formatted,
-    changed: code !== formatted
+    changed: code !== formatted,
   };
 }
 
 function calculateComplexity(code) {
   const keywords = ['if', 'else', 'for', 'while', 'case'];
   let complexity = 1;
-  keywords.forEach(keyword => {
+  keywords.forEach((keyword) => {
     const matches = code.match(new RegExp('\\b' + keyword + '\\b', 'g'));
     if (matches) complexity += matches.length;
   });
@@ -198,23 +195,23 @@ function calculateComplexity(code) {
 
 function generateSuggestions(analysis) {
   const suggestions = [];
-  
+
   if (analysis.metrics.complexity > 10) {
     suggestions.push({
       type: 'refactoring',
-      message: 'Consider breaking down complex functions into smaller ones'
+      message: 'Consider breaking down complex functions into smaller ones',
     });
   }
-  
-  analysis.issues.forEach(issue => {
+
+  analysis.issues.forEach((issue) => {
     if (issue.severity === 'high') {
       suggestions.push({
         type: 'security',
-        message: `Fix ${issue.category} issue: ${issue.message}`
+        message: `Fix ${issue.category} issue: ${issue.message}`,
       });
     }
   });
-  
+
   return suggestions;
 }
 
@@ -223,7 +220,7 @@ app.use((error, req, res, next) => {
   console.error('Error:', error);
   res.status(500).json({
     error: 'Internal server error',
-    message: error.message
+    message: error.message,
   });
 });
 
