@@ -1,0 +1,21 @@
+### Health check
+GET http://localhost:3000/health
+
+### Test process endpoint
+POST http://localhost:3000/process
+Content-Type: application/json
+
+{
+  "code": "function test() { eval(\"x\"); var y = 1; return y; }",
+  "operations": ["validate", "analyze"]
+}
+
+### Test deep analysis
+POST http://localhost:3000/analyze
+Content-Type: application/json
+
+{
+  "code": "function complex() { if(a) { if(b) { if(c) { return 1; } } } }",
+  "deep": true,
+  "include_suggestions": true
+}

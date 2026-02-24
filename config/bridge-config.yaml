@@ -1,0 +1,176 @@
+# Universal MCP Bridge Configuration
+# This configuration defines tools that can be invoked via subprocess or HTTP
+
+tools:
+  # ============================================================================
+  # SUBPROCESS TOOLS (CLI-based)
+  # ============================================================================
+  
+  - name: "analyze_code_cli"
+    description: "Analyze JavaScript code for security issues, quality problems, and complexity metrics using CLI tool"
+    adapter_type: "subprocess"
+    config:
+      command: ["node", "tools/analyze-code.js"]
+      args: ["{code}"]
+      working_dir: "."
+      timeout: 30
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to analyze"
+      required: ["code"]
+  
+  - name: "format_code_cli"
+    description: "Format JavaScript code with Prettier using CLI tool"
+    adapter_type: "subprocess"
+    config:
+      command: ["node", "tools/format-code.js"]
+      args: ["{code}"]
+      working_dir: "."
+      timeout: 30
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to format"
+        options:
+          type: "object"
+          description: "Formatting options (tabWidth, semi, singleQuote, etc.)"
+          properties:
+            tabWidth:
+              type: "integer"
+              default: 2
+            semi:
+              type: "boolean"
+              default: true
+            singleQuote:
+              type: "boolean"
+              default: false
+      required: ["code"]
+  
+  - name: "validate_code_cli"
+    description: "Validate JavaScript code syntax and structure using CLI tool"
+    adapter_type: "subprocess"
+    config:
+      command: ["node", "tools/validate-code.js"]
+      args: ["{code}"]
+      working_dir: "."
+      timeout: 30
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to validate"
+        strict:
+          type: "boolean"
+          description: "Enable strict validation mode"
+          default: false
+      required: ["code"]
+  
+  # ============================================================================
+  # HTTP TOOLS (Service-based)
+  # ============================================================================
+  
+  - name: "process_code"
+    description: "Process code with multiple operations (validate, analyze, format) via HTTP service"
+    adapter_type: "http"
+    config:
+      url: "http://localhost:3000/process"
+      method: "POST"
+      timeout: 60
+      headers:
+        Content-Type: "application/json"
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to process"
+        operations:
+          type: "array"
+          description: "List of operations to perform"
+          items:
+            type: "string"
+            enum: ["validate", "analyze", "format"]
+          default: ["validate", "analyze"]
+      required: ["code"]
+  
+  - name: "analyze_code_deep"
+    description: "Perform deep code analysis with suggestions via HTTP service"
+    adapter_type: "http"
+    config:
+      url: "http://localhost:3000/analyze"
+      method: "POST"
+      timeout: 120
+      headers:
+        Content-Type: "application/json"
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to analyze deeply"
+        deep:
+          type: "boolean"
+          description: "Enable deep analysis (may take longer)"
+          default: true
+        include_suggestions:
+          type: "boolean"
+          description: "Include improvement suggestions"
+          default: true
+      required: ["code"]
+  
+  - name: "format_code_http"
+    description: "Format JavaScript code via HTTP service"
+    adapter_type: "http"
+    config:
+      url: "http://localhost:3000/format"
+      method: "POST"
+      timeout: 30
+      headers:
+        Content-Type: "application/json"
+    input_schema:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          description: "JavaScript code to format"
+        options:
+          type: "object"
+          description: "Formatting options"
+          properties:
+            addSemicolons:
+              type: "boolean"
+              default: true
+      required: ["code"]
+  
+  - name: "health_check"
+    description: "Check the health status of the code processor service"
+    adapter_type: "http"
+    config:
+      url: "http://localhost:3000/health"
+      method: "GET"
+      timeout: 10
+      headers:
+        Content-Type: "application/json"
+    input_schema:
+      type: "object"
+      properties: {}
+
+# Server configuration (optional)
+server:
+  host: "0.0.0.0"
+  port: 8765
+  log_level: "INFO"
+
+# Database configuration (if needed)
+database:
+  enabled: false
+
+# Streaming configuration (if needed)
+streaming:
+  enabled: false
