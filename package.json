@@ -8,9 +8,9 @@
     "start:dev": "nodemon services/code-processor/server.js",
     "test": "node test.js",
     "test:cli": "node test.js",
-    "test:analyzer": "node tools/analyze-code.js 'function test() { return true; }'",
-    "test:formatter": "node tools/format-code.js 'const x=1;const y=2;'",
-    "test:validator": "node tools/validate-code.js 'console.log(\"test\")'"
+    "test:analyze": "node tools/analyze-code.js 'function test() { return true; }'",
+    "test:format": "node tools/format-code.js 'const x=1;const y=2;'",
+    "test:validate": "node tools/validate-code.js 'console.log(\"test\")'"
   },
   "keywords": [
     "wizelit",

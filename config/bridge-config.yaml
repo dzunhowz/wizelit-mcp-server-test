@@ -27,7 +27,7 @@ tools:
     adapter_type: 'subprocess'
     config:
       command: ['node', 'tools/format-code.js']
-      args: ['{code}']
+      args: ['{code}', '{language}']
       working_dir: '.'
       timeout: 30
     input_schema:
@@ -36,19 +36,10 @@ tools:
         code:
           type: 'string'
           description: 'JavaScript code to format'
-        options:
-          type: 'object'
-          description: 'Formatting options (tabWidth, semi, singleQuote, etc.)'
-          properties:
-            tabWidth:
-              type: 'integer'
-              default: 2
-            semi:
-              type: 'boolean'
-              default: true
-            singleQuote:
-              type: 'boolean'
-              default: false
+        language:
+          type: 'string'
+          description: 'Programming language (default: javascript)'
+          default: 'javascript'
       required: ['code']
 
   - name: 'validate_code_cli'
@@ -65,10 +56,6 @@ tools:
         code:
           type: 'string'
           description: 'JavaScript code to validate'
-        strict:
-          type: 'boolean'
-          description: 'Enable strict validation mode'
-          default: false
       required: ['code']
 
   # ============================================================================
